@@ -1,0 +1,8 @@
+open <com/tn/ws identifier>
+put src/app.py          app.py
+put src/device_info.py  device_info.py
+put src/device.json     device.json
+put src/event_loop.py   event_loop.py
+put src/main.py         main.py
+put src/mqtt.py         mqtt.py
+ls

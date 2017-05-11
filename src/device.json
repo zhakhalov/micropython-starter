@@ -1,0 +1,24 @@
+{
+  "version": "0.0.1",
+  "device_name": "light_1",
+  "app_name": "device",
+  "debug": true,
+  "heartbeat": {
+    "topic": "devices/heartbeat",
+    "interval": 5
+  },
+  "mqtt": {
+    "host": "",
+    "port": 0,
+    "user": "",
+    "password": "",
+    "ssl": false,
+    "reconnect_interval": 5
+  },
+  "wifi": [
+    {
+      "ssid": "",
+      "password": ""
+    }
+  ]
+}
