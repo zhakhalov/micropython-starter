@@ -1,5 +1,5 @@
 import errno
-from event_loop import event_loop
+from event_loop import add_task
 from umqtt.simple import MQTTClient
 
 # Wrapper over MQTTClient.
@@ -48,7 +48,7 @@ class MQTT:
         self.mqtt.check_msg()
       except OSError as e:
         if self.DEBUG: print('MQTT: Error occurred reading incoming message.')
-        event_loop.add_task(self.reconnect())
+        add_task(self.reconnect())
         return
       yield
 
@@ -71,7 +71,7 @@ class MQTT:
   def start_service(self):
     if self.DEBUG: print('MQTT: Start watching incoming messages.')
     self.check_msg_gen = self.check_msg()
-    event_loop.add_task(self.check_msg_gen)
+    add_task(self.check_msg_gen)
     for sub in self.subscriptions:
       self.mqtt.subscribe(sub['topic'])
 

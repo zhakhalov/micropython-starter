@@ -4,50 +4,54 @@
 
 import json
 from mqtt import mqtt
-from device_info import device_info
-from event_loop import event_loop
+from device_info import get_info
+from event_loop import sleep, add_task, run_forever
 
 # periodically publish device presense
-def heartbeat(device):
-  device_name = device['device_name']
-  interval = device['heartbeat']['interval']
-  topic = device['heartbeat']['topic']
+def heartbeat():
+  device_info = get_info()
+
+  device_name = device_info['device_name']
+  interval = device_info['heartbeat']['interval']
+  topic = device_info['heartbeat']['topic']
+
+  del device_info
 
   while True:
     try:
       mqtt.publish(topic, device_name)
     except OSError as e:
       print('Could not publish heartbeat message', e)
-    yield from event_loop.sleep(interval)
+    yield from sleep(interval)
 
 # main function.
 def main():
-  device = device_info.get_info()
+  device_info = get_info()
 
   print('-- Application {0} version {1} running on [{2}] --'.format(
-    device['app_name'],
-    device['version'],
-    device['device_name'],
+    device_info['app_name'],
+    device_info['version'],
+    device_info['device_name'],
     ))
 
   # TODO: ensure wifi is connected
 
   # initialize mqtt service
-  if 'mqtt' in device:
+  if 'mqtt' in device_info:
     try:
-      mqtt_config = device['mqtt']
-      mqtt.init(client_id =device['device_name'],
-                debug     =device['debug'] if 'debug' in device else True,
+      mqtt_config = device_info['mqtt']
+      mqtt.init(client_id =device_info['device_name'],
+                debug     =device_info['debug'] if 'debug' in device_info else True,
                 **mqtt_config)
 
       mqtt.start_service()
     except Exception as e:
       print('Could not connect mqtt.')
-      event_loop.add_task(mqtt.reconnect())
+      add_task(mqtt.reconnect())
 
   # initialize heartbeat
-  if 'heartbeat' in device:
-    event_loop.add_task(heartbeat(device))
+  if 'heartbeat' in device_info:
+    add_task(heartbeat())
 
   # try to start application
   try:
@@ -63,11 +67,13 @@ def main():
     # publish startup error
     mqtt.publish('devices/error', json.dumps({
       'reason': 'Could not start Application: {0} {1}'.format(e, stream.getvalue()),
-      'device': device['device_name'],
-      'app': device['device_name']}))
+      'device': device_info['device_name'],
+      'app': device_info['device_name']}))
+
+  del device_info
 
   # start eternal event looping
   print('Start event loop...')
-  event_loop.run_until_complete()
+  run_forever()
 
 main()

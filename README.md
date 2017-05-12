@@ -69,7 +69,7 @@ Most tasks are invoked in this loop.
 
 Usage
 ```py
-from event_loop import event_loop
+from event_loop import sleep, add_task, remove_task
 
 def task():
   cnt = 0
@@ -80,13 +80,13 @@ def task():
     print('Count:', cnt)
 
     # wait 2 seconds before next iteration
-    yield from event_loop.sleep(2)
+    yield from sleep(2)
 
 # add task to event loop
-event_loop.add_task(task())
+add_task(task())
 
 # remove task from event loop
-even_loop.remove_task(some_task_gen)
+remove_task(some_task_gen)
 
 ```
 
@@ -95,16 +95,16 @@ even_loop.remove_task(some_task_gen)
 Provides access to `device.json` file
 
 ```py
-from device_info import device_info
+from device_info import get_info, set_info, remove_keys
 
 # print dict given from device.json
-print(device_info.get_info())
+print(get_info())
 
 # update some fields
-device_info.set_info({ 'version': '0.0.2' })
+set_info({ 'version': '0.0.2' })
 
 # remove field
-device_info.remove_keys([ 'custom_key' ])
+remove_keys([ 'custom_key' ])
 
 ```
 

@@ -1,45 +1,46 @@
 import json
 
 # Loads/saves information from device.json
-class DeviceInfo:
-  DEVICE_INFO_FILE = 'device.json'
-  device_info = None
+DEVICE_INFO_FILE = 'device.json'
+__device_info = None
 
-  # Returns device info
-  def get_info(self):
-    if self.device_info is None:
-      file = open(self.DEVICE_INFO_FILE)
-      text = file.read()
-      file.close()
-      self.device_info = json.loads(text)
+# Returns device info
+def get_info():
+  global DEVICE_INFO_FILE
+  global __device_info
 
-    return self.device_info
-
-  # Writes given dict to device.json
-  def write_info(self, info):
-    text = json.dumps(info, indent=2)
-
-    file = open(self.DEVICE_INFO_FILE, 'w')
-    file.seek(0)
-    file.write(text)
+  if __device_info is None:
+    file = open(DEVICE_INFO_FILE)
+    text = file.read()
     file.close()
+    __device_info = json.loads(text)
 
-  # Removes given list of keys from device info
-  def remove_keys(self, keys):
-    device_info = self.get_info()
-    for key in keys:
-      del device_info[key]
+  return __device_info
 
-    self.write_info(device_info)
+# Writes given dict to device.json
+def write_info(info):
+  global DEVICE_INFO_FILE
+  text = json.dumps(info, indent=2)
 
-  # Updates device info with given dict
-  def set_info(self, info: dict):
-    device_info = self.get_info()
+  file = open(DEVICE_INFO_FILE, 'w')
+  file.seek(0)
+  file.write(text)
+  file.close()
 
-    for key, value in info.items():
-      device_info[key] = value
+# Removes given list of keys from device info
+def remove_keys(keys):
+  device_info = get_info()
+  for key in keys:
+    del device_info[key]
 
-    self.write_info(device_info)
+  write_info(device_info)
 
-# Singleton
-device_info = DeviceInfo()
+# Updates device info with given dict
+def set_info(info: dict):
+  device_info = get_info()
+
+  for key, value in info.items():
+    device_info[key] = value
+
+  write_info(device_info)
+
