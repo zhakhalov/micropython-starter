@@ -24,6 +24,26 @@ def heartbeat():
       print('Could not publish heartbeat message', e)
     yield from sleep(interval)
 
+def ensure_wifi():
+  import network
+  device_info = get_info()
+  wifi = device_info['wifi']
+  sta_if = network.WLAN(network.STA_IF)
+
+  if sta_if.isconnected():
+    print('Wifi connected:', sta_if.ifconfig())
+    return
+
+  print('Wifi is disconnected. Attempting to connect to one of listed in config...')
+
+  for ap in wifi:
+    sta_if.connect(ap['ssid'], ap['password'])
+    yield from sleep(5)
+
+    if sta_if.isconnected():
+      print('Wifi connected:', sta_if.ifconfig())
+      return
+
 # main function.
 def main():
   device_info = get_info()
@@ -35,6 +55,8 @@ def main():
     ))
 
   # TODO: ensure wifi is connected
+  if 'wifi' in device_info:
+    add_task(ensure_wifi())
 
   # initialize mqtt service
   if 'mqtt' in device_info:

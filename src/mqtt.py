@@ -1,5 +1,5 @@
 import errno
-from event_loop import add_task
+from event_loop import add_task, sleep
 from umqtt.simple import MQTTClient
 
 # Wrapper over MQTTClient.
@@ -65,7 +65,7 @@ class MQTT:
         return
       except Exception as e:
         if self.DEBUG: print('MQTT: Reconnection failed. Reattempt in {0} seconds.'.format(self.reconnect_interval))
-        yield from event_loop.sleep(self.reconnect_interval)
+        yield from sleep(self.reconnect_interval)
 
   # Starts monitoring of incoming messages
   def start_service(self):

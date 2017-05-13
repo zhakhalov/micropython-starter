@@ -31,7 +31,7 @@ Tested on ESP8266
     ...
   }
   ```
-- `heartbeat` - MQTT heartbeat messages configuration.
+- `heartbeat` - optional. MQTT heartbeat messages configuration.
   - If configuration is not present heartbeat will not be published
   ```json
   {
@@ -40,6 +40,20 @@ Tested on ESP8266
       "topic": "devices/heartbeat",
       "interval": 5
     }
+    ...
+  }
+  ```
+- `wifi` - optional. List of access point to connect to automatically on start.
+  - If configuration is not present heartbeat will not be published
+  ```json
+  {
+    ...
+    "wifi": [
+      {
+        "ssid": "",
+        "password": ""
+      }
+    ]
     ...
   }
   ```
