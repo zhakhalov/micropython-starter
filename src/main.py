@@ -3,6 +3,7 @@
 # It is not recommended to update this file over-the-air to avoid start-up issues and unavailability of device.
 
 import json
+import network
 from mqtt import mqtt
 from device_info import get_info
 from event_loop import sleep, add_task, run_forever
@@ -25,16 +26,11 @@ def heartbeat():
     yield from sleep(interval)
 
 def ensure_wifi():
-  import network
+  print('Wifi is disconnected. Attempting to connect to one of listed in config...')
+
   device_info = get_info()
   wifi = device_info['wifi']
   sta_if = network.WLAN(network.STA_IF)
-
-  if sta_if.isconnected():
-    print('Wifi connected:', sta_if.ifconfig())
-    return
-
-  print('Wifi is disconnected. Attempting to connect to one of listed in config...')
 
   for ap in wifi:
     sta_if.connect(ap['ssid'], ap['password'])
@@ -44,19 +40,16 @@ def ensure_wifi():
       print('Wifi connected:', sta_if.ifconfig())
       return
 
-# main function.
-def main():
+def connect_mqtt():
   device_info = get_info()
 
-  print('-- Application {0} version {1} running on [{2}] --'.format(
-    device_info['app_name'],
-    device_info['version'],
-    device_info['device_name'],
-    ))
-
-  # TODO: ensure wifi is connected
+  # ensure wifi is connected
   if 'wifi' in device_info:
-    add_task(ensure_wifi())
+    sta_if = network.WLAN(network.STA_IF)
+    if sta_if.isconnected():
+      print('Wifi connected:', sta_if.ifconfig())
+    else:
+       yield from ensure_wifi()
 
   # initialize mqtt service
   if 'mqtt' in device_info:
@@ -69,7 +62,20 @@ def main():
       mqtt.start_service()
     except Exception as e:
       print('Could not connect mqtt.')
-      add_task(mqtt.reconnect())
+      yield from mqtt.reconnect()
+
+# main function.
+def main():
+  device_info = get_info()
+
+  print('-- Application {0} version {1} running on [{2}] --'.format(
+    device_info['app_name'],
+    device_info['version'],
+    device_info['device_name'],
+    ))
+
+  # TODO: ensure wifi is connected
+  add_task(connect_mqtt())
 
   # initialize heartbeat
   if 'heartbeat' in device_info:

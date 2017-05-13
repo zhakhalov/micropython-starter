@@ -8,6 +8,7 @@ from umqtt.simple import MQTTClient
 class MQTT:
 
   subscriptions = []
+  DEBUG = True
 
   # Initialize service
   def init(self, client_id, host, port = 1883, user = None, password = None, ssl = False, reconnect_interval = 5, debug = True):
@@ -23,11 +24,17 @@ class MQTT:
   def subscribe(self, topic, handler):
     if self.DEBUG: print('MQTT: Subscribe to:', topic)
     self.subscriptions.append({ 'topic': topic, 'callback': handler })
-    if hasattr(self, 'check_msg_gen'):
-      self.mqtt.subscribe(topic)
+
+    if not hasattr(self, 'mqtt'):
+      return
+    self.mqtt.subscribe(topic)
 
   # Publish message over MQTT
   def publish(self, topic: str, msg: str):
+    if not hasattr(self, 'mqtt'):
+      if self.DEBUG: print('Could not publish message: MQTT is not initialized')
+      return
+
     self.mqtt.publish(topic, msg)
 
   # @private
