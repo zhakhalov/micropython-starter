@@ -68,13 +68,9 @@ def connect_mqtt():
 def main():
   device_info = get_info()
 
-  print('-- Application {0} version {1} running on [{2}] --'.format(
-    device_info['app_name'],
-    device_info['version'],
-    device_info['device_name'],
-    ))
+  print('-- Running on "%s" --' % device_info['device_name'])
 
-  # TODO: ensure wifi is connected
+  # start MQTT
   add_task(connect_mqtt())
 
   # initialize heartbeat
@@ -82,26 +78,29 @@ def main():
     add_task(heartbeat())
 
   # try to start application
-  try:
-    import app
-  except Exception as e:
-    from sys import print_exception
-    from uio import StringIO
-    stream = StringIO()
-    print_exception(e, stream)
+  for app in device_info['apps']:
+    try:
+        print('Starting "%s"...', app['name'])
+        __import__(app['name'])
+    except Exception as e:
+      from sys import print_exception
+      from uio import StringIO
+      stream = StringIO()
+      print_exception(e, stream)
 
-    print('Could not start Application: {0} {1}'.format(e, stream.getvalue()))
+      print('Could not start Application: %s@%s %s %s' % (app['name'], app['version'], e, stream.getvalue()))
 
-    # publish startup error
-    mqtt.publish('devices/error', json.dumps({
-      'reason': 'Could not start Application: {0} {1}'.format(e, stream.getvalue()),
-      'device': device_info['device_name'],
-      'app': device_info['device_name']}))
+      # publish startup error
+      mqtt.publish('devices/error', json.dumps({
+        'reason': 'Could not start Application: %s %s' % (e, stream.getvalue()),
+        'device': device_info['device_name'],
+        'app': app['name'],
+        'version': app['version']}))
 
   del device_info
 
   # start eternal event looping
-  print('Start event loop...')
+  print('-- Start event loop... --')
   run_forever()
 
 main()

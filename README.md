@@ -5,12 +5,12 @@ Basic starter for Micropython powered SoC. Provides Automatic management of asyn
 Tested on ESP8266
 
 ## `device.json`
-- `app_name` - `str`, required. Name of the application running on the device.
-  - Used and application identifier for automatic software update.
-  - Not recommended to change it.
-- `version` - `str`, required. Version of the application running on the device.
-  - Used and application identifier for automatic software update.
-  - Not recommended to change it.
+- `apps` - requires. List of applications running on the device.
+  - `apps.name` - `str`, required. Name of module to import on start.
+    - Used and application identifier for automatic software update.
+  - `apps.version` - `str`, required. Version of the application running on the device.
+    - Used and application identifier for automatic software update.
+    - Not recommended to change it.
 - `device_name` - `str`, required. Name of the device.
   - Used as MQTT client_id.
   - Recommended to give device unique name across MQTT network.

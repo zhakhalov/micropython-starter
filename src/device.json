@@ -1,8 +1,12 @@
 {
-  "version": "0.0.1",
-  "device_name": "light_1",
-  "app_name": "device",
+  "device_name": "some_device",
   "debug": true,
+  "apps": [
+    {
+      "name": "app",
+      "version": "0.0.1"
+    }
+  ],
   "heartbeat": {
     "topic": "devices/heartbeat",
     "interval": 5
